@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 
 jest.mock('bcrypt');
@@ -13,6 +14,7 @@ describe('AuthService', () => {
   let service: AuthService;
   let prismaService: PrismaService;
   let jwtService: JwtService;
+  let usersService: UsersService;
 
   const mockUser = {
     id: '5cf9365f-edf7-4e04-a17b-827464fb6dc0',
@@ -35,6 +37,12 @@ describe('AuthService', () => {
     sign: jest.fn(),
   };
 
+  const mockUsersService = {
+    create: jest.fn(),
+    findByEmail: jest.fn(),
+    findById: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -46,6 +54,10 @@ describe('AuthService', () => {
         {
           provide: JwtService,
           useValue: mockJwtService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
         },
       ],
     }).compile();
@@ -125,25 +137,16 @@ describe('AuthService', () => {
     };
 
     it('deve criar um novo usuário com sucesso', async () => {
-      const hashedPassword = '$2b$12$hashedpassword';
-      mockPrismaService.user.findUnique.mockResolvedValue(null);
-      mockedBcrypt.hash.mockResolvedValue(hashedPassword as never);
-      mockPrismaService.user.create.mockResolvedValue(mockUser);
+      mockUsersService.create.mockResolvedValue(mockUser);
       mockJwtService.sign.mockReturnValue('fake-jwt-token');
 
       const result = await service.signUp(signUpDto);
 
-      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { email: signUpDto.email },
-      });
-      expect(mockedBcrypt.hash).toHaveBeenCalledWith(signUpDto.password, 12);
-      expect(mockPrismaService.user.create).toHaveBeenCalledWith({
-        data: {
-          name: signUpDto.name,
-          email: signUpDto.email,
-          phone: signUpDto.phone,
-          password: hashedPassword,
-        },
+      expect(mockUsersService.create).toHaveBeenCalledWith({
+        name: signUpDto.name,
+        email: signUpDto.email,
+        phone: signUpDto.phone,
+        password: signUpDto.password,
       });
       expect(mockJwtService.sign).toHaveBeenCalledWith({ sub: mockUser.id });
       expect(result).toEqual({
@@ -155,16 +158,18 @@ describe('AuthService', () => {
       });
     });
 
-    it('deve lançar BadRequestException quando email já existir', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
+    it('deve lançar erro quando UsersService.create falhar', async () => {
+      const error = new BadRequestException('Este email já é cadastrado');
+      mockUsersService.create.mockRejectedValue(error);
 
-      await expect(service.signUp(signUpDto)).rejects.toThrow(
-        new BadRequestException('Este email já é cadastrado'),
-      );
-      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { email: signUpDto.email },
+      await expect(service.signUp(signUpDto)).rejects.toThrow(error);
+      expect(mockUsersService.create).toHaveBeenCalledWith({
+        name: signUpDto.name,
+        email: signUpDto.email,
+        phone: signUpDto.phone,
+        password: signUpDto.password,
       });
-      expect(mockPrismaService.user.create).not.toHaveBeenCalled();
+      expect(mockJwtService.sign).not.toHaveBeenCalled();
     });
   });
 });

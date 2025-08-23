@@ -60,7 +60,7 @@ describe('AuthController', () => {
   });
 
   describe('signUp', () => {
-    it('should call AuthService.signUp and return user data', async () => {
+    it('Deve chamar AuthService.signUp e retornar dados do usuário', async () => {
       const signUpDto = {
         name: 'Bernardo Padilha',
         email: 'bernardoa.padilha@gmail.com',

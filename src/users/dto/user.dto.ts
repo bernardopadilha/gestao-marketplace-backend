@@ -6,9 +6,16 @@ import {
   Matches,
   MinLength,
 } from 'class-validator';
-import { CreateOrUpdateUserDto } from '../../users/dto/user.dto';
 
-export class SignInDto {
+export class CreateOrUpdateUserDto {
+  @IsString()
+  @IsNotEmpty({ message: 'O campo name é obrigatório' })
+  name: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'O campo name é obrigatório' })
+  phone: string;
+
   @IsNotEmpty({ message: 'O campo email é obrigatório' })
   @IsEmail({}, { message: 'E-mail inválido' })
   email: string;
@@ -28,5 +35,3 @@ export class SignInDto {
   })
   password: string;
 }
-
-export class SignUpDto extends CreateOrUpdateUserDto {}
