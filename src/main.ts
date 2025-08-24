@@ -12,7 +12,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: 'https://gestao-marketplace-frontend.vercel.app',
+    origin:
+      process.env.NODE_ENV === 'development'
+        ? ['http://localhost:5173', 'http://127.0.0.1:5173']
+        : [/\.bernardopadilha\.com\.br$/],
     credentials: true,
   });
 
