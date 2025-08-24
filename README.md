@@ -72,3 +72,19 @@ docker-compose up -d && docker-compose logs -f
 Login: desafio@zeine.com.br
 Senha: Boramoer1.
 ```
+
+## Diagrama simples
+┌────────────┐         ┌─────────────┐
+│   User     │1       N│   Products  │
+├────────────┤────────>├─────────────┤
+│ id (PK)    │         │ id (PK)     │
+│ name       │         │ title       │
+│ email (U)  │         │ price       │
+│ phone (U)  │         │ description │
+│ password   │         │ category    │
+│ imageUrl?  │         │ status      │
+└────────────┘         │ imageUrl?   │
+                       │ userId (FK) │
+                       │ createdAt   │
+                       │ updatedAt   │
+                       └─────────────┘
