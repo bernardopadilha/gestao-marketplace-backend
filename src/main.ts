@@ -5,7 +5,7 @@ import { AppModule } from './app.module';
 
 import { apiReference } from '@scalar/nestjs-api-reference';
 
-const PORT = Number(process.env.PORT || 3000);
+const PORT = Number(process.env.PORT || 18012);
 const HOST = process.env.HOST || '0.0.0.0';
 
 async function bootstrap() {
@@ -38,7 +38,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   app.use(
     '/docs',
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
     apiReference({
       content: document,
     }),
