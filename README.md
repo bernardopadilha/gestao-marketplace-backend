@@ -28,6 +28,9 @@ Principais módulos:
 ## 🎥 Vídeo de demonstração
 - **https://www.youtube.com/watch?v=tUfusYwvSuA**
 
+## 📚 Documentação
+- **https://gestao-marketplace-backend.onrender.com/docs**
+
 ---
 
 ## ▶️ Como executar localmente
