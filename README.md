@@ -62,7 +62,7 @@ docker-compose up -d && docker-compose logs -f
 
 ## 🚨 Usuário pronto para teste (opcional)
 ```bash
-# Siga o passo a passo do backend para o login
+# Siga o passo a passo do frontent para o login
 Login: desafio@zeine.com.br
 Senha: Boramoer1.
 ```
