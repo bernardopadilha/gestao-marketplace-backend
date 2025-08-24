@@ -15,7 +15,7 @@ async function bootstrap() {
     origin:
       process.env.NODE_ENV === 'development'
         ? ['http://localhost:5173', 'http://127.0.0.1:5173']
-        : [/\.bernardopadilha\.com\.br$/],
+        : [/\.gestao-marketplace-frontend.vercel.app$/],
     credentials: true,
   });
 
