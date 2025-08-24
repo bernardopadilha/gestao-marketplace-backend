@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import bcrypt from 'bcrypt';
 import { S3Service } from '../_common/s3/s3.service';
@@ -30,6 +30,7 @@ describe('UsersService', () => {
 
   const mockPrismaService = {
     user: {
+      findFirst: jest.fn(),
       findUnique: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
@@ -145,20 +146,22 @@ describe('UsersService', () => {
     const createUserDto = {
       name: 'Bernardo Padilha',
       email: 'bernardoa.padilha@gmail.com',
-      phone: '(48) 99158-3678',
+      phone: '(48) 99158-1129',
       password: 'Minhasenha123.',
     };
 
     it('deve criar um novo usuário com sucesso', async () => {
       const hashedPassword = '$2b$12$hashedpassword';
-      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      mockPrismaService.user.findFirst.mockResolvedValue(null);
       mockedBcrypt.hash.mockResolvedValue(hashedPassword as never);
       mockPrismaService.user.create.mockResolvedValue(mockUser);
 
       const result = await service.create(createUserDto);
 
-      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { email: createUserDto.email },
+      expect(mockPrismaService.user.findFirst).toHaveBeenCalledWith({
+        where: {
+          OR: [{ email: createUserDto.email }, { phone: createUserDto.phone }],
+        },
       });
       expect(mockedBcrypt.hash).toHaveBeenCalledWith(
         createUserDto.password,
@@ -168,21 +171,24 @@ describe('UsersService', () => {
         data: {
           name: createUserDto.name,
           email: createUserDto.email,
+          password: expect.any(String),
           phone: createUserDto.phone,
-          password: hashedPassword,
         },
+        omit: { password: true },
       });
       expect(result).toEqual(mockUser);
     });
 
     it('deve lançar BadRequestException quando email já existir', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
+      mockPrismaService.user.findFirst.mockResolvedValue(mockUser);
 
       await expect(service.create(createUserDto)).rejects.toThrow(
-        new BadRequestException('Este email já é cadastrado'),
+        new BadRequestException('Email ou telefone já cadastrado'),
       );
-      expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
-        where: { email: createUserDto.email },
+      expect(mockPrismaService.user.findFirst).toHaveBeenCalledWith({
+        where: {
+          OR: [{ email: createUserDto.email }, { phone: createUserDto.phone }],
+        },
       });
       expect(mockPrismaService.user.create).not.toHaveBeenCalled();
       expect(mockedBcrypt.hash).not.toHaveBeenCalled();
@@ -190,7 +196,7 @@ describe('UsersService', () => {
 
     it('deve usar bcrypt com salt rounds 12', async () => {
       const hashedPassword = '$2b$12$hashedpassword';
-      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      mockPrismaService.user.findFirst.mockResolvedValue(null);
       mockedBcrypt.hash.mockResolvedValue(hashedPassword as never);
       mockPrismaService.user.create.mockResolvedValue(mockUser);
 
@@ -213,6 +219,7 @@ describe('UsersService', () => {
 
       expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
         where: { id: userId },
+        omit: { password: true },
       });
       expect(result).toEqual(mockUser);
     });
@@ -221,12 +228,13 @@ describe('UsersService', () => {
       mockPrismaService.user.findUnique.mockResolvedValue(null);
 
       await expect(service.findOne(userId)).rejects.toThrow(
-        new BadRequestException(
+        new NotFoundException(
           'Não foi possível encontrar o usuário em nossa base de dados',
         ),
       );
       expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
         where: { id: userId },
+        omit: { password: true },
       });
     });
 

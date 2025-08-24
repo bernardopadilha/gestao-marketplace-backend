@@ -13,7 +13,6 @@ import {
   CreateProductDto,
   Status,
   UpdateProductDto,
-  UpdateStatusProductDto,
 } from './dto/product.dto';
 import { ProductsService } from './products.service';
 
@@ -178,9 +177,9 @@ describe('ProductsService', () => {
       expect(result).toEqual(products);
     });
 
-    it('deve retornar produtos filtrados por categoria', async () => {
+    it('deve retornar produtos filtrados por status', async () => {
       const products = [mockProduct];
-      const filters = { category: 'BRINQUEDO' };
+      const filters = { status: 'BRINQUEDO' };
       mockPrismaService.products.findMany.mockResolvedValue(products);
 
       const result = await service.findAll(userId, filters);
@@ -188,9 +187,8 @@ describe('ProductsService', () => {
       expect(prismaService.products.findMany).toHaveBeenCalledWith({
         where: {
           userId,
-          category: {
-            contains: 'BRINQUEDO',
-            mode: 'insensitive',
+          status: {
+            equals: 'BRINQUEDO',
           },
         },
         orderBy: { createdAt: 'desc' },
@@ -208,7 +206,7 @@ describe('ProductsService', () => {
       expect(prismaService.products.findMany).toHaveBeenCalledWith({
         where: {
           userId,
-          name: {
+          title: {
             contains: 'Barbie',
             mode: 'insensitive',
           },
@@ -220,7 +218,7 @@ describe('ProductsService', () => {
 
     it('deve retornar produtos por título e categoria', async () => {
       const products = [mockProduct];
-      const filters = { title: 'Barbie', category: 'BRINQUEDO' };
+      const filters = { title: 'Barbie', status: 'BRINQUEDO' };
       mockPrismaService.products.findMany.mockResolvedValue(products);
 
       const result = await service.findAll(userId, filters);
@@ -228,11 +226,10 @@ describe('ProductsService', () => {
       expect(prismaService.products.findMany).toHaveBeenCalledWith({
         where: {
           userId,
-          category: {
-            contains: 'BRINQUEDO',
-            mode: 'insensitive',
+          status: {
+            equals: 'BRINQUEDO',
           },
-          name: {
+          title: {
             contains: 'Barbie',
             mode: 'insensitive',
           },
@@ -392,105 +389,105 @@ describe('ProductsService', () => {
     });
   });
 
-  describe('updateStatusProduct', () => {
-    const productId = 'product-id-123';
+  // describe('updateStatusProduct', () => {
+  //   const productId = 'product-id-123';
 
-    beforeEach(() => {
-      mockPrismaService.products.findUnique.mockResolvedValue(mockProduct);
-    });
+  //   beforeEach(() => {
+  //     mockPrismaService.products.findUnique.mockResolvedValue(mockProduct);
+  //   });
 
-    it('deve marcar produto como vendido', async () => {
-      const updateStatusDto: UpdateStatusProductDto = {
-        status: Status.VENDIDO,
-      };
-      const updatedProduct = { ...mockProduct, status: Status.VENDIDO };
-      mockPrismaService.products.update.mockResolvedValue(updatedProduct);
+  //   it('deve marcar produto como vendido', async () => {
+  //     const updateStatusDto: UpdateStatusProductDto = {
+  //       status: Status.VENDIDO,
+  //     };
+  //     const updatedProduct = { ...mockProduct, status: Status.VENDIDO };
+  //     mockPrismaService.products.update.mockResolvedValue(updatedProduct);
 
-      const result = await service.updateStatusProduct(
-        productId,
-        updateStatusDto,
-      );
+  //     const result = await service.updateStatusProduct(
+  //       productId,
+  //       updateStatusDto,
+  //     );
 
-      expect(prismaService.products.findUnique).toHaveBeenCalledWith({
-        where: { id: productId },
-      });
-      expect(prismaService.products.update).toHaveBeenCalledWith({
-        where: { id: productId },
-        data: { status: Status.VENDIDO },
-      });
-      expect(result).toEqual(updatedProduct);
-      expect(result.status).toBe(Status.VENDIDO);
-    });
+  //     expect(prismaService.products.findUnique).toHaveBeenCalledWith({
+  //       where: { id: productId },
+  //     });
+  //     expect(prismaService.products.update).toHaveBeenCalledWith({
+  //       where: { id: productId },
+  //       data: { status: Status.VENDIDO },
+  //     });
+  //     expect(result).toEqual(updatedProduct);
+  //     expect(result.status).toBe(Status.VENDIDO);
+  //   });
 
-    it('deve cancelar produto', async () => {
-      const updateStatusDto: UpdateStatusProductDto = {
-        status: Status.CANCELADO,
-      };
-      const updatedProduct = { ...mockProduct, status: Status.CANCELADO };
-      mockPrismaService.products.update.mockResolvedValue(updatedProduct);
+  //   it('deve cancelar produto', async () => {
+  //     const updateStatusDto: UpdateStatusProductDto = {
+  //       status: Status.CANCELADO,
+  //     };
+  //     const updatedProduct = { ...mockProduct, status: Status.CANCELADO };
+  //     mockPrismaService.products.update.mockResolvedValue(updatedProduct);
 
-      const result = await service.updateStatusProduct(
-        productId,
-        updateStatusDto,
-      );
+  //     const result = await service.updateStatusProduct(
+  //       productId,
+  //       updateStatusDto,
+  //     );
 
-      expect(prismaService.products.update).toHaveBeenCalledWith({
-        where: { id: productId },
-        data: { status: Status.CANCELADO },
-      });
-      expect(result.status).toBe(Status.CANCELADO);
-    });
+  //     expect(prismaService.products.update).toHaveBeenCalledWith({
+  //       where: { id: productId },
+  //       data: { status: Status.CANCELADO },
+  //     });
+  //     expect(result.status).toBe(Status.CANCELADO);
+  //   });
 
-    it('deve reativar produto para anunciado', async () => {
-      const updateStatusDto: UpdateStatusProductDto = {
-        status: Status.ANUNCIADO,
-      };
-      const updatedProduct = { ...mockProduct, status: Status.ANUNCIADO };
-      mockPrismaService.products.update.mockResolvedValue(updatedProduct);
+  //   it('deve reativar produto para anunciado', async () => {
+  //     const updateStatusDto: UpdateStatusProductDto = {
+  //       status: Status.ANUNCIADO,
+  //     };
+  //     const updatedProduct = { ...mockProduct, status: Status.ANUNCIADO };
+  //     mockPrismaService.products.update.mockResolvedValue(updatedProduct);
 
-      const result = await service.updateStatusProduct(
-        productId,
-        updateStatusDto,
-      );
+  //     const result = await service.updateStatusProduct(
+  //       productId,
+  //       updateStatusDto,
+  //     );
 
-      expect(prismaService.products.update).toHaveBeenCalledWith({
-        where: { id: productId },
-        data: { status: Status.ANUNCIADO },
-      });
-      expect(result.status).toBe(Status.ANUNCIADO);
-    });
+  //     expect(prismaService.products.update).toHaveBeenCalledWith({
+  //       where: { id: productId },
+  //       data: { status: Status.ANUNCIADO },
+  //     });
+  //     expect(result.status).toBe(Status.ANUNCIADO);
+  //   });
 
-    it('deve lançar NotFoundException quando produto não existe', async () => {
-      const updateStatusDto: UpdateStatusProductDto = {
-        status: Status.VENDIDO,
-      };
-      mockPrismaService.products.findUnique.mockResolvedValue(null);
+  //   it('deve lançar NotFoundException quando produto não existe', async () => {
+  //     const updateStatusDto: UpdateStatusProductDto = {
+  //       status: Status.VENDIDO,
+  //     };
+  //     mockPrismaService.products.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.updateStatusProduct(productId, updateStatusDto),
-      ).rejects.toThrow(new NotFoundException('Produto não encontrado'));
+  //     await expect(
+  //       service.updateStatusProduct(productId, updateStatusDto),
+  //     ).rejects.toThrow(new NotFoundException('Produto não encontrado'));
 
-      expect(prismaService.products.findUnique).toHaveBeenCalledWith({
-        where: { id: productId },
-      });
-      expect(prismaService.products.update).not.toHaveBeenCalled();
-    });
+  //     expect(prismaService.products.findUnique).toHaveBeenCalledWith({
+  //       where: { id: productId },
+  //     });
+  //     expect(prismaService.products.update).not.toHaveBeenCalled();
+  //   });
 
-    it('deve chamar os métodos com os parâmetros corretos', async () => {
-      const updateStatusDto: UpdateStatusProductDto = {
-        status: Status.VENDIDO,
-      };
-      const updatedProduct = { ...mockProduct, status: Status.VENDIDO };
-      mockPrismaService.products.update.mockResolvedValue(updatedProduct);
+  //   it('deve chamar os métodos com os parâmetros corretos', async () => {
+  //     const updateStatusDto: UpdateStatusProductDto = {
+  //       status: Status.VENDIDO,
+  //     };
+  //     const updatedProduct = { ...mockProduct, status: Status.VENDIDO };
+  //     mockPrismaService.products.update.mockResolvedValue(updatedProduct);
 
-      await service.updateStatusProduct(productId, updateStatusDto);
+  //     await service.updateStatusProduct(productId, updateStatusDto);
 
-      expect(prismaService.products.findUnique).toHaveBeenCalledTimes(1);
-      expect(prismaService.products.update).toHaveBeenCalledTimes(1);
-      expect(prismaService.products.update).toHaveBeenCalledWith({
-        where: { id: productId },
-        data: { status: Status.VENDIDO },
-      });
-    });
-  });
+  //     expect(prismaService.products.findUnique).toHaveBeenCalledTimes(1);
+  //     expect(prismaService.products.update).toHaveBeenCalledTimes(1);
+  //     expect(prismaService.products.update).toHaveBeenCalledWith({
+  //       where: { id: productId },
+  //       data: { status: Status.VENDIDO },
+  //     });
+  //   });
+  // });
 });

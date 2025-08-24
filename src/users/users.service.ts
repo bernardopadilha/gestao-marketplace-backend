@@ -4,11 +4,15 @@
 
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import bcrypt from 'bcrypt';
 import { S3Service } from '../_common/s3/s3.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateOrUpdateUserDto } from './dto/user.dto';
+import { CreateUserDto } from './dto/user.dto';
 
 @Injectable()
 export class UsersService {
@@ -19,6 +23,8 @@ export class UsersService {
 
   async uploadAvatar(userId: string, file: Express.Multer.File) {
     await this.findOne(userId);
+
+    if (!file) throw new BadRequestException('O arquivo é obirgatório');
 
     const fileName = `${userId}-${Date.now()}.${file.originalname.split('.').pop()}`;
     const folder = 'users/avatars';
@@ -38,16 +44,17 @@ export class UsersService {
     return { imageUrl };
   }
 
-  async create(createUserDto: CreateOrUpdateUserDto) {
+  async create(createUserDto: CreateUserDto) {
     const { name, email, phone, password } = createUserDto;
 
-    const findUser = await this.prisma.user.findUnique({
+    const findUser = await this.prisma.user.findFirst({
       where: {
-        email,
+        OR: [{ email }, { phone }],
       },
     });
 
-    if (findUser) throw new BadRequestException('Este email já é cadastrado');
+    if (findUser)
+      throw new BadRequestException('Email ou telefone já cadastrado');
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -58,6 +65,9 @@ export class UsersService {
         phone,
         password: hashedPassword,
       },
+      omit: {
+        password: true,
+      },
     });
 
     return user;
@@ -66,10 +76,13 @@ export class UsersService {
   async findOne(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
+      omit: {
+        password: true,
+      },
     });
 
     if (!user)
-      throw new BadRequestException(
+      throw new NotFoundException(
         'Não foi possível encontrar o usuário em nossa base de dados',
       );
 

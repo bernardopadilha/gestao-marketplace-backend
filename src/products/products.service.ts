@@ -10,12 +10,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import type {
   CreateProductDto,
+  Status,
   UpdateProductDto,
-  UpdateStatusProductDto,
 } from './dto/product.dto';
 
 interface FindAllProductsParams {
-  category?: string;
+  status?: string;
   title?: string;
 }
 
@@ -68,21 +68,22 @@ export class ProductsService {
   }
 
   async findAll(userId: string, params: FindAllProductsParams = {}) {
-    const { category, title } = params;
+    await this.usersService.findOne(userId);
+
+    const { status, title } = params;
 
     const where: any = {
       userId,
     };
 
-    if (category) {
-      where.category = {
-        contains: category,
-        mode: 'insensitive',
+    if (status) {
+      where.status = {
+        equals: status as Status,
       };
     }
 
     if (title) {
-      where.name = {
+      where.title = {
         contains: title,
         mode: 'insensitive',
       };
@@ -126,15 +127,6 @@ export class ProductsService {
         category,
         description,
       },
-    });
-  }
-
-  async updateStatusProduct(id: string, { status }: UpdateStatusProductDto) {
-    await this.findOne(id);
-
-    return await this.prisma.products.update({
-      where: { id },
-      data: { status },
     });
   }
 }

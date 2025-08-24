@@ -8,7 +8,6 @@ import {
   FilterProductsDto,
   Status,
   UpdateProductDto,
-  UpdateStatusProductDto,
 } from './dto/product.dto';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
@@ -189,7 +188,7 @@ describe('ProductsController', () => {
     it('deve retornar produtos filtrados por categoria', async () => {
       const products = [mockProduct];
       const filters: FilterProductsDto = {
-        category: Category.BRINQUEDO,
+        status: Category.BRINQUEDO,
       };
 
       mockProductsService.findAll.mockResolvedValue(products);
@@ -218,7 +217,7 @@ describe('ProductsController', () => {
       const products = [mockProduct];
       const filters: FilterProductsDto = {
         title: 'Barbie',
-        category: Category.BRINQUEDO,
+        status: Category.BRINQUEDO,
       };
 
       mockProductsService.findAll.mockResolvedValue(products);
@@ -290,87 +289,6 @@ describe('ProductsController', () => {
 
       expect(service.update).toHaveBeenCalledTimes(1);
       expect(service.update).toHaveBeenCalledWith(productId, updateProductDto);
-    });
-  });
-
-  describe('remove (updateStatusProduct)', () => {
-    const productId = 'product-id-123';
-
-    it('deve marcar produto como vendido', async () => {
-      const updateStatusDto: UpdateStatusProductDto = {
-        status: Status.VENDIDO,
-      };
-      const updatedProduct = {
-        ...mockProduct,
-        status: Status.VENDIDO,
-      };
-      mockProductsService.updateStatusProduct.mockResolvedValue(updatedProduct);
-
-      const result = await controller.remove(productId, updateStatusDto);
-
-      expect(service.updateStatusProduct).toHaveBeenCalledWith(
-        productId,
-        updateStatusDto,
-      );
-      expect(result).toEqual(updatedProduct);
-      expect(result.status).toBe(Status.VENDIDO);
-    });
-
-    it('deve cancelar produto', async () => {
-      const updateStatusDto: UpdateStatusProductDto = {
-        status: Status.CANCELADO,
-      };
-      const updatedProduct = {
-        ...mockProduct,
-        status: Status.CANCELADO,
-      };
-
-      mockProductsService.updateStatusProduct.mockResolvedValue(updatedProduct);
-
-      const result = await controller.remove(productId, updateStatusDto);
-
-      expect(service.updateStatusProduct).toHaveBeenCalledWith(
-        productId,
-        updateStatusDto,
-      );
-      expect(result.status).toBe(Status.CANCELADO);
-    });
-
-    it('deve reativar produto para anunciado', async () => {
-      const updateStatusDto: UpdateStatusProductDto = {
-        status: Status.ANUNCIADO,
-      };
-      const updatedProduct = {
-        ...mockProduct,
-        status: Status.ANUNCIADO,
-      };
-
-      mockProductsService.updateStatusProduct.mockResolvedValue(updatedProduct);
-
-      const result = await controller.remove(productId, updateStatusDto);
-
-      expect(service.updateStatusProduct).toHaveBeenCalledWith(
-        productId,
-        updateStatusDto,
-      );
-      expect(result.status).toBe(Status.ANUNCIADO);
-    });
-
-    it('deve chamar o service com os parâmetros corretos', async () => {
-      const updateStatusDto: UpdateStatusProductDto = {
-        status: Status.VENDIDO,
-      };
-      const updatedProduct = { ...mockProduct, status: Status.VENDIDO };
-
-      mockProductsService.updateStatusProduct.mockResolvedValue(updatedProduct);
-
-      await controller.remove(productId, updateStatusDto);
-
-      expect(service.updateStatusProduct).toHaveBeenCalledTimes(1);
-      expect(service.updateStatusProduct).toHaveBeenCalledWith(
-        productId,
-        updateStatusDto,
-      );
     });
   });
 });
