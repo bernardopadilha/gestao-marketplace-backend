@@ -1,6 +1,6 @@
 # 🟠 Gestão Marketplace - Back-end
 
-Este é o back-end da aplicação **Gestão Marketplace**, desenvolvido em **Nest.js + Prisma + **.
+Este é o back-end da aplicação **Gestão Marketplace**, desenvolvido em **Nest.js + Prisma + PostgreSQL**.
 ---
 
 ## 📂 Estrutura do Projeto
@@ -8,7 +8,6 @@ Este é o back-end da aplicação **Gestão Marketplace**, desenvolvido em **Nes
 - **Nest.js**
 - **Prisma ORM** → Modelagem e manipulação do banco de dados.
 - **PostgreSQL** → Banco de dados utilizado.
-- **CORS configurado** → Para permitir apenas requisições do front-end autorizado.
 - **Render** → Hospedagem da API em produção.
 
 Principais módulos:
