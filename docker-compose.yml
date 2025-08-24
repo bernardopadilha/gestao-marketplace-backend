@@ -1,6 +1,7 @@
 version: "3.9"
 services:
   backend:
+    build: .
     image: gestao-marketplace-backend
     ports:
       - "3000:3000"
