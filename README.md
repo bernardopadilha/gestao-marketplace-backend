@@ -41,7 +41,7 @@ cd gestao-marketplace-backend
 - 🚨 Lembre de completar o env vom variáveis enviadas no whatsApp
 ```bash
 # Crie um .env
-# Lembre de completar o env vom variáveis enviadas no whatsApp
+# Lembre de completar o env com variáveis enviadas no whatsApp
 DATABASE_URL=""
 
 JWT_SECRET=
